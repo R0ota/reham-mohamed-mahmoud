@@ -1,113 +1,117 @@
-const request = require('supertest');
-const app = require('../..');
-const jwt = require('jsonwebtoken');
-const { clearDatabase } = require('../../db.connection');
+const request = require("supertest");
+const app = require("../..");
+const jwt = require("jsonwebtoken");
+const { clearDatabase } = require("../../db.connection");
+
 const req = request(app);
 
-describe("lab testing:", () => {
-    let authToken;
-    let userId;
-    let todoId;
+describe("Lab Testing", () => {
+  let authToken;
+  let userId;
+  let todoId;
 
-    beforeAll(async () => {
-        // Create user
-        const testUser = {
-            name: "Test User",
-            email: "test@example.com",
-            password: "password123"
-        };
+  beforeAll(async () => {
+    // Create test user
+    const testUser = {
+      name: "Test User",
+      email: "test@example.com",
+      password: "password123",
+    };
 
-        // Sign up and login
-        await req.post('/user/signup').send(testUser);
-        const loginRes = await req.post('/user/login').send({
-            email: "test@example.com",
-            password: "password123"
-        });
-        
-        authToken = loginRes.body.data;
-        const decoded = jwt.verify(authToken, process.env.SECRET);
-        userId = decoded.id;
-
-        // Create a todo
-        const todoRes = await req.post('/todo')
-            .set('Authorization', authToken)
-            .send({ title: "Test Todo" });
-        todoId = todoRes.body.data._id;
+    // Signup and login
+    await req.post("/user/signup").send(testUser);
+    const loginRes = await req.post("/user/login").send({
+      email: testUser.email,
+      password: testUser.password,
     });
 
-    describe("users routes:", () => {
-        it("req to get(/user/search) ,expect to get the correct user with his name", async () => {
-            const res = await req.get('/user/search?name=Test User');
-            
-            expect(res.statusCode).toBe(200);
-            expect(res.body.data).toBeDefined();
-            expect(res.body.data.name).toBe("Test User");
-        });
+    authToken = loginRes.body.data;
+    const decoded = jwt.verify(authToken, process.env.SECRET);
+    userId = decoded.id;
 
-        it("req to get(/user/search) with invalid name ,expect res status and res message to be as expected", async () => {
-            const res = await req.get('/user/search?name=InvalidName');
-            
-            expect(res.statusCode).toBe(200);
-            expect(res.body.message).toBe("There is no user with name: InvalidName");
-        });
+    // Create a todo
+    const todoRes = await req
+      .post("/todo")
+      .set("Authorization", authToken)
+      .send({ title: "Test Todo" });
+
+    todoId = todoRes.body.data._id;
+  });
+
+  describe("User Routes", () => {
+    it("GET /user/search with valid name should return correct user", async () => {
+      const res = await req.get("/user/search?name=Test User");
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.name).toBe("Test User");
     });
 
-    describe("todos routes:", () => {
-        it("req to patch(/todo/:id) with id only ,expect res status and res message to be as expected", async () => {
-            const res = await req.patch(/todo/${todoId})
-                .set('Authorization', authToken)
-                .send({});
-            
-            expect(res.statusCode).toBe(400);
-            expect(res.body.message).toBe("must provide title and id to edit todo");
-        });
+    it("GET /user/search with invalid name should return message", async () => {
+      const res = await req.get("/user/search?name=InvalidName");
 
-        it("req to patch(/todo/:id) with id and title ,expect res status and res to be as expected", async () => {
-            const newTitle = "Updated Todo Title";
-            const res = await req.patch(/todo/${todoId})
-                .set('Authorization', authToken)
-                .send({ title: newTitle });
-            
-            expect(res.statusCode).toBe(200);
-            expect(res.body.data).toBeDefined();
-            expect(res.body.data.title).toBe(newTitle);
-        });
+      expect(res.statusCode).toBe(200);
+      expect(res.body.message).toBe("There is no user with name: InvalidName");
+    });
+  });
 
-        it("req to get(/todo/user) ,expect to get all user's todos", async () => {
-            const res = await req.get('/todo/user')
-                .set('Authorization', authToken);
-            
-            expect(res.statusCode).toBe(200);
-            expect(res.body.data.length).toBeGreaterThan(0);
-            expect(res.body.data[0].userId).toBe(userId.toString());
-        });
+  describe("Todo Routes", () => {
+    it("PATCH /todo/:id with no title should return 400", async () => {
+      const res = await req
+        .patch(`/todo/${todoId}`)
+        .set("Authorization", authToken)
+        .send({});
 
-        it("req to get(/todo/user) ,expect to not get any todos for user hasn't any todo", async () => {
-            // Create a new user with no todos
-            const testUser2 = {
-                name: "Test User 2",
-                email: "test2@example.com",
-                password: "password123"
-            };
-            
-            await req.post('/user/signup').send(testUser2);
-            const loginRes = await req.post('/user/login').send({
-                email: "test2@example.com",
-                password: "password123"
-            });
-            
-            const newUserToken = loginRes.body.data;
-            const newUserId = jwt.verify(newUserToken, process.env.SECRET).id;
-            
-            const res = await req.get('/todo/user')
-                .set('Authorization', newUserToken);
-            
-            expect(res.statusCode).toBe(200);
-            expect(res.body.message).toBe(Couldn't find any todos for ${newUserId});
-        });
+      expect(res.statusCode).toBe(400);
+      expect(res.body.message).toBe("must provide title and id to edit todo");
     });
 
-    afterAll(async () => {
-       clearDatabase()
+    it("PATCH /todo/:id with valid title should update and return todo", async () => {
+      const newTitle = "Updated Todo Title";
+      const res = await req
+        .patch(`/todo/${todoId}`)
+        .set("Authorization", authToken)
+        .send({ title: newTitle });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.title).toBe(newTitle);
     });
+
+    it("GET /todo/user should return user's todos", async () => {
+      const res = await req.get("/todo/user").set("Authorization", authToken);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.length).toBeGreaterThan(0);
+      expect(res.body.data[0].userId).toBe(userId.toString());
+    });
+
+    it("GET /todo/user for user with no todos should return message", async () => {
+      const testUser2 = {
+        name: "Test User 2",
+        email: "test2@example.com",
+        password: "password123",
+      };
+
+      await req.post("/user/signup").send(testUser2);
+      const loginRes = await req.post("/user/login").send({
+        email: testUser2.email,
+        password: testUser2.password,
+      });
+
+      const newUserToken = loginRes.body.data;
+      const newUserId = jwt.verify(newUserToken, process.env.SECRET).id;
+
+      const res = await req
+        .get("/todo/user")
+        .set("Authorization", newUserToken);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.message).toBe(`Couldn't find any todos for ${newUserId}`);
+    });
+  });
+
+  afterAll(async () => {
+    await clearDatabase();
+  });
 });
