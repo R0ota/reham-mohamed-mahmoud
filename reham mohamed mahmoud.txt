@@ -1,0 +1,103 @@
+
+Test Case 1: Successful Registration
+Steps:
+
+The user enters a full valid name
+
+Enters a valid email (e.g. user@example.com)
+
+Enters a strong password (e.g. Test@1234)
+
+Confirms the password correctly
+
+Clicks the "Sign Up" button
+
+Expected Result:
+The user is registered successfully and redirected to the welcome page or dashboard.
+
+
+Test Case 2: Registration with Mismatched Passwords
+Steps:
+
+The user enters a valid name
+
+Enters a valid email
+
+Types password: Test@1234
+
+Types a different confirm password: Test@5678
+
+Clicks "Sign Up"
+
+Expected Result:
+The system shows an error message like: "Passwords do not match" and doesn’t complete the registration.
+
+Test Case 3: Registration with Invalid Email Format
+Steps:
+
+The user enters a valid name
+
+Enters an invalid email (e.g. user@@com or user.com)
+
+Enters a valid password and confirmation
+
+Clicks the "Sign Up" button
+
+Expected Result:
+The system shows an error like: "Please enter a valid email address" and the form is not submitted.
+
+
+2 what is Code refactoring:-
+
+Code refactoring is the process of improving the internal structure of existing code without changing its external behavior. In simpler terms, it's like cleaning up or reorganizing your code to make it more readable, maintainable, and efficient—but the functionality stays the same.
+
+1 Better Readability
+Refactoring helps make the code easier to read and understand. Clear code is easier to work with and reduces confusion.
+
+Example:
+Instead of using a variable name like x, use a clear name like userEmail.
+
+
+3 What are the services / features “ ranking “  by business:-
+
+User Registration & Authentication
+Users can sign up, log in, and manage their profiles securely.
+
+Admin Dashboard
+Admins have access to a backend panel where they can upload, edit, and manage product designs.
+
+Product Catalog
+Users can browse a variety of products such as T-shirts, mugs, hoodies, and more.
+
+Design Selection & Preview
+Customers can choose from available designs and preview how each design appears on different products before purchase.
+
+Shopping Cart & Checkout
+Users can add items to their cart, review selections, and proceed through a smooth checkout process.
+
+Order Processing System
+Handles order placement and provides users with status updates on their purchases.
+
+4 Sprint 1 → Expected Output :-
+
+Sprint 1 is aimed at establishing the foundational features. The deliverables could include:
+
+1-Implementation of user authentication (registration, sign-in, and sign-out)
+
+2-A basic user interface and experience for onboarding new users
+
+3-Setting up the initial database structure (to store user profiles, settings, and preferences)
+
+4-Integration with external APIs to fetch data about destinations and activities
+
+
+
+
+
+
+
+
+
+
+
+
